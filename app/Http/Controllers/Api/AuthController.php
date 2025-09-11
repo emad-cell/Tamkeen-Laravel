@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Enum\RolesEnum;
+use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules;
+
+
+class AuthController extends Controller
+{
+    public function associationRegister(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::default()],
+            'full_name' => 'required|string|max:255',
+            'mobile_number' => 'required|string|max:20',
+            'license' => 'required|string|max:255',
+            'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::sendResponse(422, "Validation Error", $validator->messages()->all());
+        }
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
+            $filePath = $file->storeAs('uploads/associations', $fileName, 'public');
+        }
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $imageName = time() . '_' . $file->getClientOriginalName();
+            $imagePath = $file->storeAs('uploads/clients/Images', $imageName, 'public');
+        }
+        $validated = $validator->validated();
+
+        $user = User::create([
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ])->assignRole(RolesEnum::Association);
+
+        // Create association profile
+        $user->association()->create([
+            'full_name' => $validated['full_name'],
+            'mobile_number' => $validated['mobile_number'],
+            'lisence' => $validated['license'],
+            'file_path' => $filePath,
+            'image' => $imagePath,
+            'accepted'=>0,
+        ]);
+        $data['token'] = $user->createToken('Auth')->plainTextToken;
+        $data['name'] = $user->full_name;
+        $data['email'] = $user->email;
+                    event(new Registered($user));
+            Auth::login($user);
+        return ApiResponse::sendResponse(201, 'User Account Created Successfully', $data);
+    }
+
+
+
+    public function clientRegister(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::default()],
+            'full_name' => 'required|string|max:255',
+            'mobile_number' => 'required|string|max:20',
+            'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::sendResponse(422, "Validation Error", $validator->messages()->all());
+        }
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
+            $filePath = $file->storeAs('uploads/clients/Files', $fileName, 'public');
+        }
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $imageName = time() . '_' . $file->getClientOriginalName();
+            $imagePath = $file->storeAs('uploads/clients/Images', $imageName, 'public');
+        }
+
+        $validated = $validator->validated();
+
+        $user = User::create([
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ])->assignRole(RolesEnum::Client);
+
+        // Create client profile
+        $user->client()->create([
+            'full_name' => $validated['full_name'],
+            'mobile_number' => $validated['mobile_number'],
+            'file_path' => $filePath,
+            'accepted' => 0,
+            'image' => $imagePath,
+        ]);
+        $data['token'] = $user->createToken('Auth')->plainTextToken;
+        $data['name'] = $user->full_name;
+        $data['email'] = $user->email;
+                            event(new Registered($user));
+            Auth::login($user);
+        return ApiResponse::sendResponse(201, 'User Account Created Successfully', $data);
+    }
+
+
+    public function Login(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|',
+            'password' => ['required'],
+        ]);
+        if ($validator->fails()) {
+            return ApiResponse::sendResponse(422, "Login Validation Error", $validator->messages()->all());
+        }
+        $validated = $validator->validated();
+        if(Auth::attempt([
+            'email'=>$validated['email'],
+            'password' => $validated['password'],
+        ])){
+            $user=Auth::user();
+            $role = $user->getRoleNames()->first();
+
+            // تحديد الصلاحيات بناءً على الدور
+            $abilities = match ($role) {
+                'admin' => ['access:admin'],
+                'association' => ['access:association'],
+                'client' => ['access:client'],
+                default => [],
+            };
+
+            // إنشاء التوكن مع الصلاحيات
+            $data['token'] = $user->createToken('Auth', $abilities)->plainTextToken;
+            $data['name'] = $user->client?->full_name ?? $user->association?->full_name ?? 'User';
+            $data['email'] = $user->email;
+            $data['role'] = $role;
+            $data['id']=$user->id;
+
+            return ApiResponse::sendResponse(200, 'User Logged In Successfully', $data);
+        }else{
+            return ApiResponse::sendResponse(401, 'User Credentials Doesn\'t exist', []);
+        }
+    }
+}
