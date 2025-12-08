@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained('users')->onDelete('cascade'); // ربط العميل
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // ربط العميل
+            $table->string('email');// ربط العميل
             $table->foreignId('service_id')->constrained('services')->onDelete('cascade'); // ربط الخدمة
             $table->string('status')->default('pending'); // حالة الطلب
             $table->text('notes')->nullable(); // ملاحظات العميل

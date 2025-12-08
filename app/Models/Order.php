@@ -99,7 +99,7 @@ class Order extends Model
     // }
     public function client()
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // العلاقة مع الخدمة

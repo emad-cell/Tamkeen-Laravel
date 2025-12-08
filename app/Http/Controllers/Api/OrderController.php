@@ -13,8 +13,10 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\ServiceResource;
+use App\Mail\OrderAcceptedMail;
 use App\Models\Client;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -48,8 +50,8 @@ class OrderController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $orders = Order::with(['client', 'service']) // جلب كل الأعمدة من client و service
-            ->where('client_id', $id)
+        $orders = Order::with(['client', 'service'])
+            ->where('user_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -68,7 +70,13 @@ class OrderController extends Controller
             return ApiResponse::sendResponse(404, 'Order not found');
         }
 
+        // Update order status
         $order->update(['status' => 'active']);
+        // $number=$order->->user && $this->user->association ? $this->user->association->full_name : null,
+        // Send email to the user
+        if ($order->email) { // make sure user exists and has email
+            Mail::to($order->email)->send(new OrderAcceptedMail($order));
+        }
 
         return ApiResponse::sendResponse(200, 'Order updated successfully', new OrderResource($order));
     }

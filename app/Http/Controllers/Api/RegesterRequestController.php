@@ -7,8 +7,11 @@ use App\Http\Helpers\ApiResponse;
 use App\Models\RegesterRequest;
 use App\Http\Requests\StoreRegesterRequestRequest;
 use App\Http\Requests\UpdateRegesterRequestRequest;
+use App\Mail\ClientAcceptedMail;
 use App\Models\Association;
 use App\Models\Client;
+use Illuminate\Support\Facades\Mail;
+
 use App\Models\Service;
 use App\Models\User;
 
@@ -85,10 +88,8 @@ class RegesterRequestController extends Controller
             if ($client) {
                 $client->accepted = 1;
                 $client->save();
-
-                // جيب التوكن الموجود (آخر واحد مثلاً)
-                $token = $user->tokens()->latest()->first()?->token;
-
+                //     Mail::to($user->email)->send(new ClientAcceptedMail($user));
+                // $token = $user->tokens()->latest()->first()?->token;
                 return response()->json([
                     'message' => 'Client activated successfully',
                     'token'   => $token,
@@ -102,6 +103,10 @@ class RegesterRequestController extends Controller
             if ($association) {
                 $association->accepted = 1;
                 $association->save();
+                if ($user->email) {
+                    Mail::to($user->email)->send(new ClientAcceptedMail($user));
+                }
+
 
                 $token = $user->tokens()->latest()->first()?->token;
 

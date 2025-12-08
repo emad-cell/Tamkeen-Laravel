@@ -42,31 +42,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
             'password'=>Hash::make('emademad')
         ])->assignRole(RolesEnum::Admin);
-        User::factory()->create([
-            'email' => 'association@example.com',
-            'password'=>Hash::make('emademad')
-        ])->assignRole(RolesEnum::Association);
-        User::factory()->create([
-            'email' => 'client@example.com',
-            'password'=>Hash::make('emademad')
-        ])->assignRole(RolesEnum::Client);
-        Client::create([
-            'user_id' => 3,
-            'full_name' => 'مستخدم',
-            'mobile_number' => '966512345678',
-            'file_path' => 'uploads/uploads/clients/Files/obito.pdf',
-            'accepted'=>0,
-            'image' => 'uploads/uploads/clients/Images/obito.pdf',
-        ]);
-        Association::create([
-            'user_id' => 2,
-            'full_name' => ' جمعية',
-            'mobile_number' => '966512345678',
-            'lisence' => '123123123',
-            'accepted' => 0,
-            'file_path' => 'uploads/uploads/clients/Files/obito.pdf',
-            'image' => 'uploads/uploads/clients/Images/obito.pdf',
-        ]);
         Setting::create([
             'about_footer'=>'منصة إلكترونية شاملة لربط ذوي الإحتياجات الخاصة بالخدمات المتخصصة التي يحتاجونها بطريقة سهلة وموثوقة.',
             'phone1'=>'+963938614264',
@@ -75,7 +50,6 @@ class DatabaseSeeder extends Seeder
             'linkedin'=>'',
             'instagram'=>'',
             'youtube'=>'',
-
         ]);
     }
 }

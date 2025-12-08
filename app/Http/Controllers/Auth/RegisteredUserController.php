@@ -32,7 +32,7 @@ class RegisteredUserController extends Controller
     public function associationRegister(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'full_name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'licence' => ['required', 'string'],
@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
         $request->file('file')->storeAs('Files', $fileName, 'local');
         if ($request['uesrType'] == "association") {
             $user = User::create([
-                'name' => $validated['name'],
+                'name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'licence' => $validated['licence'],
@@ -56,7 +56,7 @@ class RegisteredUserController extends Controller
             return redirect()->route('home');
         } else {
             $user = User::create([
-                'name' => $validated['name'],
+                'name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'licence' => "00000000",

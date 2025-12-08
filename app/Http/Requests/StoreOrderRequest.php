@@ -24,8 +24,8 @@ class StoreOrderRequest extends FormRequest
         return [
             'service_id' => 'required|exists:services,id',
             'notes' => 'nullable|string|max:1000',
-            'client_id'=>'integer|required',
-
+            'user_id'=>'required',
+            'email' => 'required|string|email|max:255',
         ];
     }
 }

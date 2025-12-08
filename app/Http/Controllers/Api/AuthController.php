@@ -64,8 +64,7 @@ class AuthController extends Controller
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
                     event(new Registered($user));
-            Auth::login($user);
-        return ApiResponse::sendResponse(201, 'User Account Created Successfully', $data);
+        return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
     }
 
 
@@ -116,8 +115,7 @@ class AuthController extends Controller
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
                             event(new Registered($user));
-            Auth::login($user);
-        return ApiResponse::sendResponse(201, 'User Account Created Successfully', $data);
+        return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
     }
 
 
@@ -150,6 +148,7 @@ class AuthController extends Controller
             $data['name'] = $user->client?->full_name ?? $user->association?->full_name ?? 'User';
             $data['email'] = $user->email;
             $data['role'] = $role;
+            $data['state']=$$user->client?->accepted ?? $user->association?->accepted ?? 0;
             $data['id']=$user->id;
 
             return ApiResponse::sendResponse(200, 'User Logged In Successfully', $data);
