@@ -30,7 +30,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::sendResponse(422, "Validation Error", $validator->messages()->all());
+            return ApiResponse::sendResponse(422, "خطأ في التحق", $validator->messages()->all());
         }
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -58,12 +58,12 @@ class AuthController extends Controller
             'lisence' => $validated['license'],
             'file_path' => $filePath,
             'image' => $imagePath,
-            'accepted'=>0,
+            'accepted' => 0,
         ]);
         $data['token'] = $user->createToken('Auth')->plainTextToken;
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
-                    event(new Registered($user));
+        event(new Registered($user));
         return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
     }
 
@@ -71,6 +71,7 @@ class AuthController extends Controller
 
     public function clientRegister(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::default()],
@@ -81,7 +82,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::sendResponse(422, "Validation Error", $validator->messages()->all());
+            return ApiResponse::sendResponse(422, "خطأ في التحق", $validator->messages()->all());
         }
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -114,46 +115,78 @@ class AuthController extends Controller
         $data['token'] = $user->createToken('Auth')->plainTextToken;
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
-                            event(new Registered($user));
+        event(new Registered($user));
         return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
     }
 
 
-    public function Login(Request $request){
+    public function Login(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|',
-            'password' => ['required'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
+
         if ($validator->fails()) {
-            return ApiResponse::sendResponse(422, "Login Validation Error", $validator->messages()->all());
+            return ApiResponse::sendResponse(
+                422,
+                "Login Validation Error",
+                $validator->messages()->all()
+            );
         }
+
         $validated = $validator->validated();
-        if(Auth::attempt([
-            'email'=>$validated['email'],
-            'password' => $validated['password'],
-        ])){
-            $user=Auth::user();
-            $role = $user->getRoleNames()->first();
 
-            // تحديد الصلاحيات بناءً على الدور
-            $abilities = match ($role) {
-                'admin' => ['access:admin'],
-                'association' => ['access:association'],
-                'client' => ['access:client'],
-                default => [],
-            };
-
-            // إنشاء التوكن مع الصلاحيات
-            $data['token'] = $user->createToken('Auth', $abilities)->plainTextToken;
-            $data['name'] = $user->client?->full_name ?? $user->association?->full_name ?? 'User';
-            $data['email'] = $user->email;
-            $data['role'] = $role;
-            $data['state']=$$user->client?->accepted ?? $user->association?->accepted ?? 0;
-            $data['id']=$user->id;
-
-            return ApiResponse::sendResponse(200, 'User Logged In Successfully', $data);
-        }else{
-            return ApiResponse::sendResponse(401, 'User Credentials Doesn\'t exist', []);
+        if (!Auth::attempt($validated)) {
+            return ApiResponse::sendResponse(
+                401,
+                'User Credentials Doesn\'t exist',
+                []
+            );
         }
+
+        $user = Auth::user();
+
+        // 🛑 التحقق من حالة القبول
+        $accepted =
+            $user->client?->accepted ??
+            $user->association?->accepted ??
+            0;
+
+
+
+        $role = $user->getRoleNames()->first();
+
+        $abilities = match ($role) {
+            'admin' => ['access:admin'],
+            'association' => ['access:association'],
+            'client' => ['access:client'],
+            default => [],
+        };
+
+        $data = [
+            'token' => $user->createToken('Auth', $abilities)->plainTextToken,
+            'name' => $user->client?->full_name
+                ?? $user->association?->full_name
+                ?? 'User',
+            'email' => $user->email,
+            'role' => $role,
+            'state' => $accepted,
+            'id' => $user->id,
+        ];
+        if ($accepted == 0 && $role != "admin") {
+            Auth::logout();
+            return ApiResponse::sendResponse(
+                403,
+                'حسابك قيد المراجعة ولم يتم قبوله بعد',
+                ['حسابك قيد المراجعة ولم يتم قبوله بعد']
+            );
+        }
+        return ApiResponse::sendResponse(
+            200,
+            'User Logged In Successfully',
+            $data
+        );
     }
+
 }

@@ -34,11 +34,11 @@ class RegesterRequestController extends Controller
         // إعادة النتائج بعد الفلترة وتحويلها إلى مصفوفة عادية
         $result = $filtered->map(function ($user) {
             return [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'email'       => $user->email,
-                'role'        => $user->getRoleNames()->first(), // Spatie
-                'client'      => $user->client,       // بيانات client إذا موجود
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->getRoleNames()->first(), // Spatie
+                'client' => $user->client,       // بيانات client إذا موجود
                 'association' => $user->association,  // بيانات association إذا موجود
             ];
         })->values()->all(); // ← تحويل إلى مصفوفة
@@ -62,11 +62,12 @@ class RegesterRequestController extends Controller
         // إعادة النتائج بعد الفلترة وتحويلها إلى مصفوفة عادية
         $result = $filtered->map(function ($user) {
             return [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'email'       => $user->email,
-                'role'        => $user->getRoleNames()->first(), // Spatie
-                'client'      => $user->client,       // بيانات client إذا موجود
+                'id' => $user->id,
+                'image_url' => $user->client->image ? asset('storage/' . $user->client->image) : null,
+                'file_url' => $user->client->file_path ? asset('storage/' . $user->client->file_path) : null,
+                'email' => $user->email,
+                'role' => $user->getRoleNames()->first(), // Spatie
+                'client' => $user->client,       // بيانات client إذا موجود
                 'association' => $user->association,  // بيانات association إذا موجود
             ];
         })->values()->all(); // ← تحويل إلى مصفوفة
@@ -89,11 +90,11 @@ class RegesterRequestController extends Controller
                 $client->accepted = 1;
                 $client->save();
                 //     Mail::to($user->email)->send(new ClientAcceptedMail($user));
-                // $token = $user->tokens()->latest()->first()?->token;
+                $token = $user->tokens()->latest()->first()?->token;
                 return response()->json([
                     'message' => 'Client activated successfully',
-                    'token'   => $token,
-                    'user'    => $user,
+                    'token' => $token,
+                    'user' => $user,
                 ]);
             }
         }
@@ -112,8 +113,8 @@ class RegesterRequestController extends Controller
 
                 return response()->json([
                     'message' => 'Association activated successfully',
-                    'token'   => $token,
-                    'user'    => $user,
+                    'token' => $token,
+                    'user' => $user,
                 ]);
             }
         }
@@ -136,10 +137,10 @@ class RegesterRequestController extends Controller
             + Association::where('accepted', 0)->count();
 
         return response()->json([
-            'services_count'     => $servicesCount,
-            'clients_count'      => $clientsCount,
+            'services_count' => $servicesCount,
+            'clients_count' => $clientsCount,
             'associations_count' => $associationsCount,
-            'pending_count'      => $pendingCount,
+            'pending_count' => $pendingCount,
         ]);
     }
 }
