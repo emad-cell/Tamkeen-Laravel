@@ -1,108 +1,143 @@
-Tamkeen Platform — Laravel Backend
+# Tamkeen — تمكين 🌟
 
-هذا المستودع يحتوي على الجزء الخلفي (Backend) من منصة تمكين، وهي منصّة تهدف إلى ربط ذوي الاحتياجات الخاصة بالجمعيّات المختصّة من خلال عرض الخدمات والوظائف وإتاحة التقديم عليها بسهولة.
+> A platform connecting people with special needs to verified associations offering specialized services.
 
-يوفّر هذا المشروع API ونظام إدارة (Dashboard) لإدارة البيانات التي تظهر في الواجهة الأمامية المبنية بـ React.
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
+![Laravel](https://img.shields.io/badge/Laravel-12-red)
+![React](https://img.shields.io/badge/React-18-blue)
 
-🎯 الهدف من النظام
+---
 
-تقديم خدمة تمكّن:
+## 📌 About The Project
 
-الجمعيات من إضافة خدماتها وبرامجها.
+**Tamkeen (تمكين)** is a web platform designed to empower people with special needs by connecting them with trusted associations and NGOs that offer specialized services — such as therapy sessions, psychological support, and rehabilitation programs.
 
-الشركات من نشر الوظائف المناسبة لذوي الاحتياجات الخاصة.
+Think of it as a service marketplace, but purpose-built for the special needs community:
 
-المستخدمين من تصفّح الخدمات والوظائف.
+- 🏥 **Associations** list the services they offer
+- 🙋 **Clients** browse and request those services
+- 🛡️ **Admins** verify that associations are legitimate before they go live
 
-التقديم المباشر من خلال المنصّة.
+---
 
-إدارة كاملة للطلبات والمستخدمين عبر لوحة تحكم مبنية بلارافيل.
+## ✨ Key Features
 
-🛠 التقنيات والأدوات المستخدمة
+### For Clients (People with Special Needs)
 
-Laravel (الإصدار الحديث)
+- Browse available services offered by verified associations
+- Request services directly through the platform
+- Share success stories with the community
 
-MySQL كقاعدة بيانات
+### For Associations / NGOs
 
-Eloquent ORM
+- Register and submit official documents for verification
+- List and manage offered services (therapy, counseling, etc.)
+- Manage job listings related to their services
 
-Authentication System
+### For Admins
 
-API Resources
+- Review and approve/reject association registration requests
+- Verify uploaded official documents before granting access
+- Manage all users, services, and success stories
+- Full control via a dedicated admin dashboard
 
-Migrations & Seeders
+---
 
-Validation Requests
+## 🔐 Roles & Permissions
 
-🚀 المميزات الأساسية في الـ Backend
+Built with **Spatie Laravel Permission** for fine-grained access control:
 
-إدارة المستخدمين (Users Management)
+| Role          | Permissions                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| `Admin`       | Manage Users, Manage Services, Manage Jobs, Manage Success Stories |
+| `Association` | Manage Services, Manage Jobs                                       |
+| `Client`      | Request Services, Add Success Stories                              |
 
-إدارة الجمعيات (Organizations)
+---
 
-إدارة الوظائف (Jobs)
+## 🛠️ Tech Stack
 
-إدارة الخدمات (Services)
+| Layer        | Technology                          |
+| ------------ | ----------------------------------- |
+| Backend      | Laravel 12                          |
+| Frontend     | React 18                            |
+| Auth & Roles | Laravel Sanctum + Spatie Permission |
+| Database     | MySQL                               |
 
-إدارة طلبات التقديم (Applications)
+---
 
-نظام صلاحيات مرن (إن وجد)
+## 🚀 Getting Started
 
-API نظيفة جاهزة للاستهلاك من تطبيق React
+### Prerequisites
 
-📦 التثبيت والتشغيل
-1) نسخ المشروع
-git clone <repo-url>
-cd tamkeen-laravel
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- MySQL
 
-2) تثبيت الاعتمادات
+### Installation
+
+```bash
+# Clone the repositories
+git clone https://github.com/emad-cell/Tamkeen-Laravel
+git clone https://github.com/emad-cell/Tamkeen-React
+
+# --- Backend Setup ---
+cd Tamkeen-Laravel
 composer install
-
-3) إعداد ملف البيئة
 cp .env.example .env
-
-
-ثم عدّل إعدادات قاعدة البيانات داخل ملف .env.
-
-4) توليد مفتاح التشفير
 php artisan key:generate
 
-5) إعداد قاعدة البيانات
+# Configure your database in .env, then:
 php artisan migrate --seed
-
-6) تشغيل السيرفر المحلي
+php artisan storage:link
 php artisan serve
 
+# --- Frontend Setup ---
+cd ../Tamkeen-React
+npm install
+npm run dev
+```
 
-يعمل السيرفر الافتراضي على:
+### Default Admin Credentials
 
-http://localhost:8000
+```
+Email:    admin@example.com
+Password: (set in seeder)
+```
 
-🔌 استهلاك الـ API
+---
 
-واجهة React أو أي عميل آخر يمكنه استهلاك الـ API من خلال المسارات المعرّفة في:
+## 📁 Project Structure
 
-routes/api.php
+```
+Tamkeen-Laravel/     → REST API backend (Laravel 12)
+Tamkeen-React/       → Frontend SPA (React)
+```
 
-📁 هيكلة المشروع (مختصر)
-app/
- ├── Models/
- ├── Http/
- │    ├── Controllers/
- │    ├── Requests/
- │    └── Resources/
-routes/
- ├── api.php
- └── web.php
-database/
- ├── migrations/
- ├── seeders/
+---
 
-🧑‍💻 المطوّر
+## 🗺️ Roadmap
 
-Emad
-Full-Stack Developer — Laravel & React
+- [x] Role & permission system (Admin / Association / Client)
+- [x] Association registration with document upload
+- [x] Admin approval workflow
+- [x] Service management
+- [x] Success stories
+- [ ] Service request flow (in progress)
+- [ ] Notifications system
+- [ ] Admin dashboard UI completion
+- [ ] Deployment
 
-📄 الرخصة
+---
 
-هذا المشروع مفتوح للاستخدام والتطوير.
+## 👨‍💻 Author
+
+**Emad Dayoub**
+
+- GitHub: [@emad-cell](https://github.com/emad-cell)
+- LinkedIn: [linkedin.com/in/emad-dayoub-354b95284](https://www.linkedin.com/in/emad-dayoub-354b95284)
+
+---
+
+> 🚧 This project is currently under active development.

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -18,8 +17,8 @@ return new class extends Migration
             $table->string('mobile_number');
             $table->boolean('accepted');
             $table->string('lisence');
-            $table->string('file_path')->nullable(); // e.g. uploaded CV, profile pic, etc.
-            $table->string('image')->nullable(); // e.g. uploaded CV, profile pic, etc.
+            $table->string('file_path'); // e.g. uploaded CV, profile pic, etc.
+            $table->string('image'); // e.g. uploaded CV, profile pic, etc.
             $table->timestamps();
         });
     }

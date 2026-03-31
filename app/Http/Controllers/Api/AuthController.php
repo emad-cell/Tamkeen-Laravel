@@ -24,26 +24,26 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::default()],
             'full_name' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:20',
-            'license' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'license' => 'required|string|max:255',
+            // 'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::sendResponse(422, "خطأ في التحق", $validator->messages()->all());
+            return ApiResponse::sendResponse(422, 'Failed to create your account', $validator->errors()->toArray());
         }
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
-            $filePath = $file->storeAs('uploads/associations', $fileName, 'public');
-        }
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . '_' . $file->getClientOriginalName();
-            $imagePath = $file->storeAs('uploads/clients/Images', $imageName, 'public');
-        }
+        // $filePath = null;
+        // if ($request->hasFile('file')) {
+        //     $file = $request->file('file');
+        //     $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
+        //     $filePath = $file->storeAs('uploads/associations/Files', $fileName, 'public');
+        // }
+        // $imagePath = null;
+        // if ($request->hasFile('image')) {
+        //     $file = $request->file('image');
+        //     $imageName = time() . '_' . $file->getClientOriginalName();
+        //     $imagePath = $file->storeAs('uploads/associations/Images', $imageName, 'public');
+        // }
         $validated = $validator->validated();
 
         $user = User::create([
@@ -54,17 +54,23 @@ class AuthController extends Controller
         // Create association profile
         $user->association()->create([
             'full_name' => $validated['full_name'],
-            'mobile_number' => $validated['mobile_number'],
-            'lisence' => $validated['license'],
-            'file_path' => $filePath,
-            'image' => $imagePath,
-            'accepted' => 0,
+            // 'mobile_number' => $validated['mobile_number'],
+            // 'lisence' => $validated['license'],
+            // 'file_path' => $filePath,
+            // 'image' => $imagePath,
+            'accepted' => 1,
         ]);
         $data['token'] = $user->createToken('Auth')->plainTextToken;
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
         event(new Registered($user));
-        return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
+        // return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
+
+        return ApiResponse::sendResponse(
+            200,
+            'Your account created successfully',
+            $data
+        );
     }
 
 
@@ -76,26 +82,26 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::default()],
             'full_name' => 'required|string|max:255',
-            'mobile_number' => 'required|string|max:20',
-            'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'mobile_number' => 'required|string|max:20',
+            // 'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'image' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::sendResponse(422, "خطأ في التحق", $validator->messages()->all());
+            return ApiResponse::sendResponse(422, 'Failed to create your account', $validator->errors()->toArray());
         }
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
-            $filePath = $file->storeAs('uploads/clients/Files', $fileName, 'public');
-        }
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . '_' . $file->getClientOriginalName();
-            $imagePath = $file->storeAs('uploads/clients/Images', $imageName, 'public');
-        }
+        // $filePath = null;
+        // if ($request->hasFile('file')) {
+        //     $file = $request->file('file');
+        //     $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
+        //     $filePath = $file->storeAs('uploads/clients/Files', $fileName, 'public');
+        // }
+        // $imagePath = null;
+        // if ($request->hasFile('image')) {
+        //     $file = $request->file('image');
+        //     $imageName = time() . '_' . $file->getClientOriginalName();
+        //     $imagePath = $file->storeAs('uploads/clients/Images', $imageName, 'public');
+        // }
 
         $validated = $validator->validated();
 
@@ -107,16 +113,22 @@ class AuthController extends Controller
         // Create client profile
         $user->client()->create([
             'full_name' => $validated['full_name'],
-            'mobile_number' => $validated['mobile_number'],
-            'file_path' => $filePath,
-            'accepted' => 0,
-            'image' => $imagePath,
+            // 'mobile_number' => $validated['mobile_number'],
+            // 'file_path' => $filePath,
+            'accepted' => 1,
+            // 'image' => $imagePath,
         ]);
         $data['token'] = $user->createToken('Auth')->plainTextToken;
         $data['name'] = $user->full_name;
         $data['email'] = $user->email;
         event(new Registered($user));
-        return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
+        // return ApiResponse::sendResponse(201, 'تم تسجيل طلبك بنجاح . يرجى انتظار رسالة قبول الطلب عبر البريد الالكتروني', []);
+
+        return ApiResponse::sendResponse(
+            200,
+            'Your account created Successfully',
+            $data
+        );
     }
 
 
@@ -130,8 +142,8 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return ApiResponse::sendResponse(
                 422,
-                "Login Validation Error",
-                $validator->messages()->all()
+                'Failed to login',
+                $validator->errors()->toArray()
             );
         }
 

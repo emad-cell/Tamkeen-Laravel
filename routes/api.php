@@ -9,6 +9,14 @@ use App\Http\Controllers\Api\RegesterRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 
 use function Ramsey\Uuid\v1;
 
@@ -17,8 +25,10 @@ use function Ramsey\Uuid\v1;
 
 
 
-Route::get('/settings', [SettingController::class,'index']);
+Route::get('/settings', [SettingController::class, 'index']);
 Route::post('/user/{id}/active', [RegesterRequestController::class, 'active']);
+Route::post('/user/{id}/delete', [RegesterRequestController::class, 'delete']);
+
 Route::get('/allusers', [RegesterRequestController::class, 'getUsers']);
 Route::get('/allPendusers', [RegesterRequestController::class, 'gePendtUsers']);
 Route::get('/stats', [RegesterRequestController::class, 'stats']);
@@ -30,16 +40,21 @@ Route::resource('service', ServiceController::class);
 Route::resource('associations', AssociationController::class);
 
 // Orders
-Route::controller(AuthController::class)->group(function (){
-Route::resource('orders', OrderController::class);
-// Route::get('order/{id}', [OrderController::class, 'update']);
+Route::controller(AuthController::class)->group(function () {
+    Route::resource('orders', OrderController::class);
+    // Route::get('order/{id}', [OrderController::class, 'update']);
 });
 // Auth
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return $request->user();
+});
 Route::controller(AuthController::class)->group(function () {
     Route::post('/associationRegister', 'associationRegister');
     Route::post('/clientRegister', 'clientRegister');
     Route::post('/login', 'login');
 });
+
 
 
 

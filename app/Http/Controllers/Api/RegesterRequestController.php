@@ -121,6 +121,16 @@ class RegesterRequestController extends Controller
 
         return response()->json(['message' => 'User has no valid role or related record not found'], 400);
     }
+    public function delete(int $id)
+    {
+        if ($user = User::find($id)) {
+            $user->delete();
+            return ApiResponse::sendResponse(201, 'تم رفض المستخدم بنجاح', []);
+        }
+
+
+        return response()->json(['message' => 'User has no valid role or related record not found'], 400);
+    }
     public function stats()
     {
         // 1. عدد الخدمات
